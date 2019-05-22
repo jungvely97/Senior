@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Scanner;
 
-class Cmd {
+public class Cmd {
     private StringBuffer buff, readbuff;
     private Process p;
     private BufferedReader buffreader;
@@ -70,26 +70,63 @@ class Cmd {
 
 }
 
+public class Conversion2{
+    public static String Builder(String FileName){
+        ProcessBuilder builder = new ProcessBuilder(
+                "cmd.exe", "/c", "cd \"C:\\dex2jar-2.0\" && d2j-dex2jar.bat ",FileName); ///try to chatch로
+        builder.redirectErrorStream(true);
+        Process p = builder.start();
+        BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        while (true) {
+            String line;
+            line = r.readLine();
+            if (line == null) {break;}
+            System.out.println(line);
+        }
+        return null;
+    }
+}
+
+public class Jar {
+    public static String JarFunc(String args) {
+        String[] cmd = {"cmd", "/c", "cd C:\\test && jar xvf ", args + "-dex2jar.jar"};
+        Process process = null;
+        try {
+            process = new ProcessBuilder(cmd).start();
+
+            Scanner s = new Scanner(process.getInputStream(), "EUC-KR");
+            while (s.hasNextLine() == true) {
+                System.out.println(s.nextLine());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
 public class Start {
     public static void main(String[] args){
         Cmd cmd = new Cmd();
         String apk = new String();
-        String fileName = new String();
+        String FileName = new String();
+        String Conversion2Class = new String();
 
         String order = cmd.inputCommand("pm list packages -f");
         String result = cmd.resultCommand(order);
 
         System.out.println(result);
-        System.out.println("Write apk");
+        System.out.println("Write apk : 예).apk 까지 복붙");
         Scanner apkScan = new Scanner(System.in);
         apk = apkScan.next();
-        System.out.println("Write file name");
+        System.out.println("Write file name : 예) test.apk");
         Scanner fileNameScan = new Scanner(System.in);
-        fileName = fileNameScan.next();
+        FileName = fileNameScan.next();
 
-        String download = cmd.downloadFile(apk, fileName);
+        String download = cmd.downloadFile(apk, FileName);
         System.out.println(download);
 
+        Conversion2Class = Conversion2.Builder(FileName);
+        String JarClass = Jar.JarFunc(FileName);
     }
 }
 
