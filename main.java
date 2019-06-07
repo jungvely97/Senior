@@ -159,6 +159,46 @@ public class Dajava {
 		 	} 
 		 	return null; 
 		 	} 
+	
+	public static class JarDecode { 
+		     public static void JarFunc(String args) { 
+		         String[] cmd = {"cmd", "/c", "cd C:\\test && jar xvf ", args + "-dex2jar.jar"}; 
+		         Process process = null; 
+		         try { 
+		             process = new ProcessBuilder(cmd).start(); 
+		             Scanner s = new Scanner(process.getInputStream(), "EUC-KR"); 
+		             while (s.hasNextLine() == true) { System.out.println(s.nextLine()); } 
+		         } catch (IOException e) { e.printStackTrace(); } 
+		     } 
+		 } 
+
+	 //----------- 이 클래스는 .class 파일들의 경로를 filelist배열에 차례로 넣어줍니다. (하위디렉토리 포함) 
+	public static class ClassList { 
+	     public static String[] filelist = new String[9999]; 
+	     public static String[] Start() { 
+	         try { 
+	             String path="C:\\test1"; // --------------- 읽어들일 DIR 경로  
+	             System.out.println("Directory Name:" + path); 
+	             // main process. 
+	             (new ClassList()).showFileList(path); 
+	         } catch (Exception ex) { ex.printStackTrace(); } 
+	         return filelist; 
+	     } 
+	     int j=0; 
+	     public void showFileList(String path) throws Exception { 
+	         File dir = new File(path); 
+	         File[] files = dir.listFiles(); 
+	 	 
+	         for (int i = 0; i < files.length; i++) { 
+	             File file = files[i]; 
+	 	 
+	             if (file.isFile()) { 
+	                 if(file.getCanonicalPath().toString().contains(".class")) filelist[j] = file.getCanonicalPath().toString(); System.out.println(j+filelist[j]);j++; 
+	             //파일 목록 출력 없애려면 바로 윗줄의 System.out.println(j+filelist[j]); 부분을 지우시면 됩니다 
+	             } else if (file.isDirectory()) { try { showFileList(file.getCanonicalPath().toString()); } catch (Exception e) { } } 
+	         } 
+	     } }
+
 
 	
     public static void main(String[] args){
@@ -166,13 +206,14 @@ public class Dajava {
         String apk = new String();
         String ApkName = new String();
         String apk_to_zip = new String();
-       
+ 		String[] filelist;
+ 		
         //Get ApK
         String order = cmd.inputCommand("pm list packages -f");
         String result = cmd.resultCommand(order);
 
         System.out.println(result);
-        System.out.println("Write apk [예).apk 까지 복붙] :");
+        System.out.println("Write apk [예)/ 부터 .apk 까지 복붙] :");
         Scanner apkScan = new Scanner(System.in);
         apk = apkScan.next();
         System.out.println("Write file name [예) test.apk] :");
@@ -195,6 +236,11 @@ public class Dajava {
 		String dex_to_jar; 
  		dex_to_jar = DexToJar(DexName);  
  		System.out.println("dex -> jar 파일변환 성공"); 
+ 		
+ 		JarDecode.JarFunc("classes"); // jar 파일 압축 풀기 함수선언
+ 		 
+ 		filelist = ClassList.Start(); // .class 경로 넣기 함수 선언 
+
 
         
     }
