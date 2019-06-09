@@ -1,10 +1,14 @@
 import java.io.IOException;
+import java.io.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import test.ClassList;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -76,7 +80,6 @@ public class Dajava {
 
 	}
 	
-
 	public static String ApkToZip(String FileName){ 
 		 File file = new File("C:\\DaJaVa\\dex2jar-2.0",FileName); 
 		 int pos = FileName.lastIndexOf(".");
@@ -85,6 +88,7 @@ public class Dajava {
 	 	 _filename.append(".zip");
 	 	 filename = _filename.toString();
 		 file.renameTo(new File("C:\\DaJaVa\\dex2jar-2.0\\",filename));
+		 System.out.println("zip 변환 성공");
 	 		 
 		 return filename;
 		} 
@@ -143,7 +147,7 @@ public class Dajava {
 	public static String DexToJar(String dexName){ 
 		 	try { 
 		 	 ProcessBuilder builder = new ProcessBuilder( 
-		 			  "cmd.exe", "/c", "cd \"C:\\dex2jar-2.0\" && d2j-dex2jar.bat ",dexName); 
+		 			  "cmd.exe", "/c", "cd \"C:\\DaJaVa\\dex2jar-2.0\" && d2j-dex2jar.bat ",dexName); 
 		 	 builder.redirectErrorStream(true); 
 		 	 Process p = builder.start(); 
 		 	 BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream())); 
@@ -152,8 +156,8 @@ public class Dajava {
 		 		  line = r.readLine(); 
 		 		  if (line == null) {break;} 
 		 		  System.out.println(line); 
-		 	  } 
-		 	 } 
+		 	  } System.out.println("dex -> jar 파일변환 성공");
+		 	 }  
 		 		catch (IOException e) { 
 		 	        e.printStackTrace(); 
 		 	} 
@@ -162,22 +166,24 @@ public class Dajava {
 	
 	public static class JarDecode { 
 		     public static void JarFunc(String args) { 
-		         String[] cmd = {"cmd", "/c", "cd C:\\test && jar xvf ", args + "-dex2jar.jar"}; 
+		    	 StringBuilder jarname = new StringBuilder(args);
+		    	 jarname.append("-dex2jar.jar");
+		    	 args = jarname.toString();
+		         String[] cmd = { "cmd", "/c","cd C:\\DaJaVa\\dex2jar-2.0 && jar xvf ",args};
 		         Process process = null; 
 		         try { 
 		             process = new ProcessBuilder(cmd).start(); 
 		             Scanner s = new Scanner(process.getInputStream(), "EUC-KR"); 
 		             while (s.hasNextLine() == true) { System.out.println(s.nextLine()); } 
+		             System.out.println("Jar파일 압축해제 성공");
 		         } catch (IOException e) { e.printStackTrace(); } 
 		     } 
 		 } 
-
-	 //----------- 이 클래스는 .class 파일들의 경로를 filelist배열에 차례로 넣어줍니다. (하위디렉토리 포함) 
 	public static class ClassList { 
 	     public static String[] filelist = new String[9999]; 
 	     public static String[] Start() { 
 	         try { 
-	             String path="C:\\test1"; // --------------- 읽어들일 DIR 경로  
+	             String path="C:\\DaJaVa\\dex2jar-2.0"; // --------------- 읽어들일 DIR 경로  
 	             System.out.println("Directory Name:" + path); 
 	             // main process. 
 	             (new ClassList()).showFileList(path); 
@@ -188,25 +194,60 @@ public class Dajava {
 	     public void showFileList(String path) throws Exception { 
 	         File dir = new File(path); 
 	         File[] files = dir.listFiles(); 
-	 	 
+	 
+	 
 	         for (int i = 0; i < files.length; i++) { 
-	             File file = files[i]; 
-	 	 
-	             if (file.isFile()) { 
-	                 if(file.getCanonicalPath().toString().contains(".class")) filelist[j] = file.getCanonicalPath().toString(); System.out.println(j+filelist[j]);j++; 
+	        	 File file = files[i];
+	             if (file.isFile()) {            	 
+	                 if(file.getCanonicalPath().toString().contains(".class")) {
+	                	 filelist[j] = file.getCanonicalPath().toString();
+	                	 System.out.println(j+filelist[j]);j++; 
+	                 }
 	             //파일 목록 출력 없애려면 바로 윗줄의 System.out.println(j+filelist[j]); 부분을 지우시면 됩니다 
 	             } else if (file.isDirectory()) { try { showFileList(file.getCanonicalPath().toString()); } catch (Exception e) { } } 
 	         } 
-	     } }
+	     } 
+	 } 
 
-
+		//난독화 체크
+	 public static class CheckObfuscation { 		 
+	     public static int CheckFunction(String classPath) { 
+	    	 int cnt = 0;
+	          try { 
+		            File f = new File(classPath); 
+		            FileReader fr = new FileReader(String.valueOf(f)); 
+		            BufferedReader bufr = new BufferedReader(fr); 
+		            String input = "void";  
+		            String line = ""; 
+		            while ((line = bufr.readLine()) != null) { 
+		                 if (line.contains(input)) { 
+		                      int a = line.indexOf(input); 
+		                      int b = line.indexOf("("); 
+		                      String word = line.substring(a, b); 
+		 		 
+		                      if (word.length() <= 2) { 
+	                             //System.out.println("난독화 설정 O"); 
+		                    	   cnt  = 1;		                    	  
+		                      }
+		                         else cnt = 0; //System.out.println("난독화 설정 X"); 
+		                     } } 
+		                 bufr.close(); 		 
+		            	 }
+		              catch (FileNotFoundException e) { 
+		                 e.printStackTrace(); 
+		             } catch (IOException e) { 
+		                 e.printStackTrace(); 
+		             } return cnt;
+	          } 
+	 }
 	
     public static void main(String[] args){
         GetAPK cmd = new GetAPK();
         String apk = new String();
         String ApkName = new String();
         String apk_to_zip = new String();
- 		String[] filelist;
+        String[] filelist;
+        int cnt;
  		
         //Get ApK
         String order = cmd.inputCommand("pm list packages -f");
@@ -235,15 +276,20 @@ public class Dajava {
         String DexName = "classes.dex";
 		String dex_to_jar; 
  		dex_to_jar = DexToJar(DexName);  
- 		System.out.println("dex -> jar 파일변환 성공"); 
  		
  		JarDecode.JarFunc("classes"); // jar 파일 압축 풀기 함수선언
- 		 
+ 		
  		filelist = ClassList.Start(); // .class 경로 넣기 함수 선언 
-
-
-        
-    }
+ 		for(int i = 0; i < filelist.length; i++) {
+ 			if(filelist[i] != null) {
+ 				String classpath = filelist[i];
+ 				cnt = CheckObfuscation.CheckFunction(classpath); // 난독화 체크
+ 				if(cnt == 1) System.out.println("난독화 설정 O");
+ 				if(cnt == 0) System.out.println("난독화 설정 X");
+ 			}
+ 		}
+       
+    }   	
 }
 
 
