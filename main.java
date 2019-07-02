@@ -1,11 +1,31 @@
+
 import java.io.*;
+
 import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
 import test.ClassList;
 
 
 public class Dajava {
+	public static void createfile(){
+		String path = "C:\\DaJaVa";
+		File folder = new File(path);
+		
+		if(!folder.exists()) {
+			try {
+				folder.mkdir();
+				System.out.println("DaJaVa 폴더 생성 되었습니다.");
+			}
+			catch(Exception e) {
+				e.getStackTrace();
+			}
+		}
+		else {
+			System.out.println("폴더가 있습니다.");
+		}
+	}
 	public static class GetAPK{
 	    public static StringBuffer buff, readbuff;
 	    public static Process p;
@@ -240,7 +260,8 @@ public class Dajava {
         String apk_to_zip = new String();
         String[] filelist;
         int cnt;
- 		
+ 		//Create DaJaVa File
+        createfile();
         //Get ApK
         String order = cmd.inputCommand("pm list packages -f");
         String result = cmd.resultCommand(order);
