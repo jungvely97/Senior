@@ -5,8 +5,6 @@ import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import test.ClassList;
-
 
 public class Dajava {
 	public static void createfile(){
@@ -26,6 +24,25 @@ public class Dajava {
 			System.out.println("폴더가 있습니다.");
 		}
 	}
+	public static void Move(){
+
+		try {
+		 	 ProcessBuilder builder = new ProcessBuilder( "cmd.exe", "/c", "move C:\\dex2jar-2.0.zip C:\\DaJaVa\\dex2jar-2.0.zip"); 
+		 	 builder.redirectErrorStream(true); 
+		 	 Process p = builder.start();
+			 BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			Scanner s = new Scanner(p.getInputStream()); 
+            while(true) {
+		 		  String line = r.readLine(); 
+		 		  if (line == null) {break;} 
+		 		  System.out.println(line);            	
+            }
+            System.out.println("파일 이동 성공");
+            } catch (IOException e) { 
+            	e.printStackTrace();
+            	System.out.println("파일 이동 실패");
+            } 
+		}	
 	public static class GetAPK{
 	    public static StringBuffer buff, readbuff;
 	    public static Process p;
@@ -91,6 +108,173 @@ public class Dajava {
 	    }
 
 	}
+    public static String XmlFunc(String args) {
+        String[] cmd = { "cmd", "/c",  "cd c:\\DaJaVa && apktool d -f", args};
+        Process process = null;
+        try {
+            process = new ProcessBuilder(cmd).start();
+
+            Scanner s = new Scanner(process.getInputStream(), "EUC-KR");
+            while (s.hasNextLine() == true) {
+                System.out.println(s.nextLine());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "c:\\DaJaVa\\"+args+"\\AndroidManifest.xml"; //xml경로를 String으로 return
+    }
+	public static class CheckXML{
+	    public void Manifest_Debug(String path) {
+	        // 디버그 모드 확인 (AndroidManifest.xml 파일에서 확인 가능)
+	        // 디버그 모드면 외부에서 임의의 코드를 주입 가능, 개발시에만 사용해야함
+	        try {
+	            String check = "android:debuggable=\"true\"";
+
+	            File f = new File(path);
+	            FileReader fr = new FileReader(String.valueOf(f));
+	            BufferedReader bufr = new BufferedReader(fr);
+	            String line = "";
+	            while ((line = bufr.readLine()) != null) {
+	                if (line.contains(check))
+	                    // 라인 중 android:debuggable="true" 포함한 라인 찾음
+	                    System.out.println("디버그 모드 작동 중 -> 취약");
+	            }
+	            bufr.close();
+	        } catch (FileNotFoundException e) {
+	            System.out.println("파일을 찾을 수 없음");
+	        } catch (IOException e) {
+	            System.out.println(e);
+	        }
+	    }
+
+	    public void Manifest_Backup(String path) {
+	        // 백업 허용 확인 (AndroidManifest.xml 파일에서 확인 가능)
+	        // 악의적 사용자가 adb를 사용하여 앱의 개인 데이터를 자신의 PC에 가져올 수 있음.
+	        try {
+	            String check = "android:allowBackup=\"true\"";
+
+	            File f = new File(path);
+	            FileReader fr = new FileReader(String.valueOf(f));
+	            BufferedReader bufr = new BufferedReader(fr);
+	            String line = "";
+	            while ((line = bufr.readLine()) != null) {
+	                if (line.contains(check))
+	                    // 라인 중 android:allowBackup="true" 포함한 라인 찾음
+	                    System.out.println("adb를 통해 백업 허용 중 -> 취약");
+	            }
+	            bufr.close();
+	        } catch (FileNotFoundException e) {
+	            System.out.println("파일을 찾을 수 없음");
+	        } catch (IOException e) {
+	            System.out.println(e);
+	        }
+	    }
+
+	    public void Manifest_Location(String path) {
+	        // 사용자의 위치 정보 접근 확인 (AndroidManifest.xml 파일에서 확인 가능)
+	        // Wi-Fi와 같은 네트워크 위치 소스를 통해 위치 얻어짐. 기본 권한으로 설정되어 있으면 위험함.
+	        try {
+	            String check = "android.permission.ACCESS_COARSE_LOCATION";
+
+	            File f = new File(path);
+	            FileReader fr = new FileReader(String.valueOf(f));
+	            BufferedReader bufr = new BufferedReader(fr);
+	            String line = "";
+	            while ((line = bufr.readLine()) != null) {
+	                if (line.contains(check))
+	                    // 라인 중 android.permission.ACCESS_COARSE_LOCATION 포함한 라인 찾음
+	                    System.out.println("위치 정보 접근 허용 -> 취약");
+	            }
+	            bufr.close();
+	        } catch (FileNotFoundException e) {
+	            System.out.println("파일을 찾을 수 없음");
+	        } catch (IOException e) {
+	            System.out.println(e);
+	        }	    
+	}
+	    public void Manifest_Phone(String path) {
+	        // Phone 권한 확인 (AndroidManifest.xml 파일에서 확인 가능)
+	        // 장치의 전화번호, 네트워크정보, 진행중인 통화의 상태 읽어오기, 사용자의 통화 기록 읽기 가능
+	        try {
+	            String check = "android.permission.READ_CALL_LOG";
+	            String check2 = "android.permission.READ_PHONE_STATE";
+
+	            File f = new File(path);
+	            FileReader fr = new FileReader(String.valueOf(f));
+	            BufferedReader bufr = new BufferedReader(fr);
+	            String line = "";
+	            while ((line = bufr.readLine()) != null) {
+	                if (line.contains(check))
+	                    // 라인 중 android.permission.READ_CALL_LOG 포함한 라인 찾음
+	                    System.out.println("사용자의 통화 기록 읽기 허용 -> 취약");
+	                if (line.contains(check2))
+	                	// 라인 중 android.permission.READ_PHONE_STATE 포함된 라인 찾음
+	                	System.out.println("장치의 전화 번호, 네트워크 정보, 진행중인 통화의 상태 읽어오기 허용 -> 취약");
+	            }
+	            bufr.close();
+	        } catch (FileNotFoundException e) {
+	            System.out.println("파일을 찾을 수 없음");
+	        } catch (IOException e) {
+	            System.out.println(e);
+	        }
+	    }
+	    public void Manifest_Activity(String path) {
+	        // 액티비티 컴포넌트 확인 (AndroidManifest.xml 파일에서 확인 가능)
+	        // 다른 에플리케이션의 Activity를 실행 할 수 있음.
+	    	try {
+	    		int i = 0;
+	    		int count = 0;
+	            String check = "activity android:exported=\"true\"";
+
+	            File f = new File(path);
+	            FileReader fr = new FileReader(String.valueOf(f));
+	            BufferedReader bufr = new BufferedReader(fr);
+	            String line = "";
+	            while ((line = bufr.readLine()) != null) {
+	                
+					if (line.contains(check))
+	                    // 라인 중 android:exported="true" 포함한 라인 찾음
+	                    //System.out.println("다른 애플리케이션의 Activity 실행가능 -> 취약");
+	                	i++;
+						count = i;
+	            }
+	            if (i > 0)
+	            {
+	            System.out.println("노출된 Activity 갯수 : "+count+" -> 취약");
+	            }
+	            bufr.close();
+	        } catch (FileNotFoundException e) {
+	            System.out.println("파일을 찾을 수 없음");
+	        } catch (IOException e) {
+	            System.out.println(e);
+	        }
+}
+	    public int find(){
+	        //xml파일에서 provider 검색 함수
+	        String filename = "AndroidManifest.xml";
+	        String word = "(?i).*provider.*";
+	        int num=0;
+	        try {
+	            BufferedReader reader = new BufferedReader(new FileReader(filename));
+	            String s;
+
+	            int line =1;
+
+	            while ((s = reader.readLine()) != null) {
+	                if (s.matches(word)){
+	                    System.out.println(line + " : " + s);
+	                    num++;
+	                }
+	                line++; }
+	        } catch (FileNotFoundException e) { e.printStackTrace(); }
+	        catch (IOException e) { e.printStackTrace(); }
+	        if(num>0)
+	            return 1; //content provide 취약점이 있으면 1 return
+	        else
+	            return 0;
+	    }
+}
+
 	
 	public static String ApkToZip(String FileName){ 
 		 File file = new File("C:\\DaJaVa\\dex2jar-2.0",FileName); 
@@ -255,6 +439,7 @@ public class Dajava {
 	
     public static void main(String[] args){
         GetAPK cmd = new GetAPK();
+        CheckXML checkxml = new CheckXML();
         String apk = new String();
         String ApkName = new String();
         String apk_to_zip = new String();
@@ -262,6 +447,16 @@ public class Dajava {
         int cnt;
  		//Create DaJaVa File
         createfile();
+        //move dex2 tool zip file
+        Move();
+        //dex2.zip decode
+        try{ 
+        		String zipfile = "dex2jar-2.0.zip";
+		       ZipDecode.decompress(zipfile, "C:\\DaJaVa\\"); 
+		       System.out.println("zip파일 압축해제 성공"); 
+		     }catch(Throwable e){ 
+		       e.printStackTrace(); 
+		     }
         //Get ApK
         String order = cmd.inputCommand("pm list packages -f");
         String result = cmd.resultCommand(order);
@@ -276,9 +471,21 @@ public class Dajava {
 
         String download = cmd.downloadFile(apk, ApkName);
         System.out.println(download);
+        //XML decode 
+        String XmlPath;
+        XmlPath = XmlFunc(ApkName);
+        System.out.println(XmlPath);
+        //XML Check
+        String path = "C:\\apktool\\InsecureBankv2\\AndroidManifest.xml";
+        checkxml.Manifest_Debug(path);
+        checkxml.Manifest_Backup(path);
+        checkxml.Manifest_Location(path);
+        checkxml.Manifest_Phone(path);
+        checkxml.Manifest_Activity(path);
+        checkxml.find();
         //apk to zip
         apk_to_zip = ApkToZip(ApkName);
-        //zip decode 
+        //application zip decode 
         try{ 
 		       ZipDecode.decompress(apk_to_zip, "C:\\DaJaVa\\dex2jar-2.0"); 
 		       System.out.println("zip파일 압축해제 성공"); 
@@ -304,5 +511,4 @@ public class Dajava {
        
     }   	
 }
-
 
