@@ -109,7 +109,7 @@ public class Dajava {
 
 	}
     public static String XmlFunc(String args) {
-        String[] cmd = { "cmd", "/c",  "cd c:\\DaJaVa && apktool d -f", args};
+        String[] cmd = { "cmd", "/c",  "cd c:\\DaJaVa\\dex2jar-2.0\\ && apktool d -f", args};
         Process process = null;
         try {
             process = new ProcessBuilder(cmd).start();
@@ -118,10 +118,12 @@ public class Dajava {
             while (s.hasNextLine() == true) {
                 System.out.println(s.nextLine());
             }
+         int pos = args.lastIndexOf(".");
+   	 	 args = args.substring(0, pos);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "c:\\DaJaVa\\"+args+"\\AndroidManifest.xml"; //xml경로를 String으로 return
+        return  "c:\\DaJaVa\\dex2jar-2.0\\" +args+"\\AndroidManifest.xml"; //xml경로를 String으로 return
     }
 	public static class CheckXML{
 	    public void Manifest_Debug(String path) {
@@ -475,14 +477,6 @@ public class Dajava {
         String XmlPath;
         XmlPath = XmlFunc(ApkName);
         System.out.println(XmlPath);
-        //XML Check
-        String path = "C:\\apktool\\InsecureBankv2\\AndroidManifest.xml";
-        checkxml.Manifest_Debug(path);
-        checkxml.Manifest_Backup(path);
-        checkxml.Manifest_Location(path);
-        checkxml.Manifest_Phone(path);
-        checkxml.Manifest_Activity(path);
-        checkxml.find();
         //apk to zip
         apk_to_zip = ApkToZip(ApkName);
         //application zip decode 
@@ -508,7 +502,16 @@ public class Dajava {
  				if(cnt == 0) System.out.println("난독화 설정 X");
  			}
  		}
+        //XML Check
+        //String path = "C:\\DaJaVa\\dex2jar-2.0\\파일이름\\AndroidManifest.xml";
+        checkxml.Manifest_Debug(XmlPath);
+        checkxml.Manifest_Backup(XmlPath);
+        checkxml.Manifest_Location(XmlPath);
+        checkxml.Manifest_Phone(XmlPath);
+        checkxml.Manifest_Activity(XmlPath);
+        checkxml.find();
        
     }   	
 }
+
 
