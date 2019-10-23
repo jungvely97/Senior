@@ -292,8 +292,8 @@ public class Dajava {
 		 return filename;
 		} 
 	
-	public static class ZipDecode{
-	public static void decompress(String zipFileName, String directory) throws Throwable { 
+	//public static class ZipDecode{ //여기 주석 및 디컴프레스 함수랑 크리에이트 파일 예외처리 고치기 함수를 비교하면서 고쳐야함
+	public static void decompress(String zipFileName, String directory){ 
 			 File zipFile = new File("C:\\DaJaVa\\dex2jar-2.0\\",zipFileName); 
 		     FileInputStream fis = null; 
 		     ZipInputStream zis = null; 
@@ -312,16 +312,18 @@ public class Dajava {
 		           createFile(file, zis); 
 		         } 
 		       } 
-		     } catch (Throwable e) { 
-		       throw e; 
+		     } catch (IOException e) { 
+
 		     } finally { 
-		       if (zis != null) 
-		         zis.close(); 
-		       if (fis != null) 
-		         fis.close(); 
+		    	 try {
+		    		 zis.close();
+		    		 fis.close();
+		    	 }catch(IOException e) {
+		    		 
+		    	 }		    	 
 		     } 
 		   } 
-		   private static void createFile(File file, ZipInputStream zis) throws Throwable { 
+		   private static void createFile(File file, ZipInputStream zis) {
 		     //디렉토리 확인 
 		     File parentDir = new File(file.getParent()); 
 		     //디렉토리가 없으면 생성 
@@ -337,11 +339,11 @@ public class Dajava {
 		         //byte로 파일 만들기 
 		         fos.write(buffer, 0, size); 
 		       } 
-		     } catch (Throwable e) { 
-		       throw e; 
+		     } catch (IOException e) { 
+
 		     } 
 		   }
-	}
+	//} //여기 주석
 	
 	public static String DexToJar(String dexName){ 
 		 	try { 
@@ -455,7 +457,7 @@ public class Dajava {
         //dex2.zip decode
         try{ 
         		String zipfile = "dex2jar-2.0.zip";
-		       ZipDecode.decompress(zipfile, "C:\\DaJaVa\\"); 
+		        decompress(zipfile, "C:\\DaJaVa\\");  //여기
 		       System.out.println("zip파일 압축해제 성공"); 
 		     }catch(Throwable e){ 
 		       e.printStackTrace(); 
@@ -486,7 +488,7 @@ public class Dajava {
         apk_to_zip = ApkToZip(ApkName);
         //application zip decode 
         try{ 
-		       ZipDecode.decompress(apk_to_zip, "C:\\DaJaVa\\dex2jar-2.0"); 
+		       decompress(apk_to_zip, "C:\\DaJaVa\\dex2jar-2.0"); //여기 수정
 		       System.out.println("zip파일 압축해제 성공"); 
 		     }catch(Throwable e){ 
 		       e.printStackTrace(); 
